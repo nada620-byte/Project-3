@@ -61,45 +61,178 @@ private:
 
 public:
     // Constructor
-    Patient(int pid, string n, int a, string c);
+Patient(int pid, string n, int a, string c) {
+    id = pid;
+    name = n;
+    age = a;
+    contact = c;
+
+    isAdmitted = false;
+    bill = 0;
+}
 
     // ========== ORIGINAL FEATURES ========== //
 
-    void admitPatient(RoomType type);
-    void dischargePatient();
 
-    void addMedicalRecord(string record);
+void admitPatient(RoomType type){
+    if (isAdmitted) {
+        cout << "Patient is already admitted." << endl;
+        return;
+    }
 
-    void requestTest(string testName);
-    string performTest();
+    isAdmitted = true;
+    roomType = type;
 
-    void displayHistory();
+    addMedicalRecord("Patient admitted to hospital");
 
-    int getId();
-    string getName();
+    switch (type) {
+        case GENERAL_WARD:
+            addBill(500);
+            break;
 
-    bool getAdmissionStatus();
+        case ICU:
+            addBill(3000);
+            break;
+
+        case PRIVATE_ROOM:
+            addBill(1500);
+            break;
+
+        case SEMI_PRIVATE:
+            addBill(1000);
+            break;
+    }
+}
+
+
+   void dischargePatient() {
+    if (!isAdmitted) {
+        cout << "Patient is not currently admitted." << endl;
+        return;
+    }
+
+    isAdmitted = false;
+
+    addMedicalRecord("Patient discharged from hospital");
+}
+
+
+    void addMedicalRecord(string record) {
+    medicalHistory.push(record);
+}
+
+
+   void requestTest(string testName) {
+    testQueue.push(testName);
+
+    addMedicalRecord("Test requested: " + testName);
+}
+
+
+string performTest() {
+    if (testQueue.empty()) {
+        return "No tests pending";
+    }
+
+    string testName = testQueue.front();
+    testQueue.pop();
+
+    addMedicalRecord("Test performed: " + testName);
+
+    addBill(300);
+
+    return testName;
+}
+
+    void displayHistory() {
+    cout << "Medical History for " << name
+         << " (ID: " << id << "):" << endl;
+
+    stack<string> temp = medicalHistory;
+
+    while (!temp.empty()) {
+        cout << "- " << temp.top() << endl;
+        temp.pop();
+    }
+}
+
+int getId() {
+    return id;
+}
+   string getName() {
+    return name;
+}
+
+    bool getAdmissionStatus() {
+    return isAdmitted;
+}
 
 
     // ========== NEW FEATURES ========== //
 
     // Medical Tests
-    void displayPendingTests();
+    void displayPendingTests() {
+    if (testQueue.empty()) {
+        cout << "No pending tests." << endl;
+        return;
+    }
+
+    cout << "Pending Tests:" << endl;
+
+    queue<string> temp = testQueue;
+
+    while (!temp.empty()) {
+        cout << "- " << temp.front() << endl;
+        temp.pop();
+    }
+}
 
     // Prescriptions
-    void addPrescription(string medicine);
-    void displayPrescriptions();
+   void addPrescription(string medicine) {
+    prescriptions.push_back(medicine);
+
+    addMedicalRecord("Prescription added: " + medicine);
+
+    addBill(100);
+}
+
+   void displayPrescriptions() {
+    if (prescriptions.empty()) {
+        cout << "No prescriptions." << endl;
+        return;
+    }
+
+    cout << "Prescriptions:" << endl;
+
+    for (string medicine : prescriptions) {
+        cout << "- " << medicine << endl;
+    }
+}
 
     // Billing
-    void addBill(double amount);
-    double getBill();
-    void displayBill();
+    void addBill(double amount) {
+    bill += amount;
+}
+    double getBill() {
+    return bill;
+}
+
+    void displayBill(){
+    cout << "Patient ID: " << id << endl;
+    cout << "Patient Name: " << name << endl;
+    cout << "Total Bill: $" << bill << endl;
+    }
 
     // Additional Getters
-    int getAge();
-    string getContact();
-    RoomType getRoomType();
-};
+    int getAge() {
+    return age;
+}
+    string getContact() {
+    return contact;
+}
+ RoomType getRoomType() {
+    return roomType;
+}
 
 
 // ========== DOCTOR CLASS ========== //
