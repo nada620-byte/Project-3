@@ -243,32 +243,111 @@ private:
     Department department;
 
     // Queue of patients waiting for doctor
-    queue<int> appointmentQueue;
+    queue<int> appointmentQueue; // stores patients ids
 
 public:
     // Constructor
-    Doctor(int did, string n, Department d);
-
+    Doctor(int did, string n, Department d)
+    {
+        id = did;
+        name = n;
+        department = d;
+    }
     // ========== ORIGINAL FEATURES ========== //
-
-    void addAppointment(int patientId);
-    int seePatient();
-
-    int getId();
-    string getName();
-    string getDepartment();
-
-
+    void addAppointment(int patientId)
+    {
+        appointmentQueue.push(patientId);
+    }
+    int seePatient()
+    {
+        if(appointmentQueue.empty())
+        return -1;
+        else
+        {
+            int pt_id = appointmentQueue.front();
+            appointmentQueue.pop();
+            return pt_id ;
+        }
+    }
+    int getId()
+    {
+        return id;
+    }
+    string getName()
+    {
+        return name;
+    }
+    string getDepartment()   // enum number we have to switch to a string 
+    {                        // as the return type
+        switch(department)
+        {
+            case CARDIOLOGY:
+            return "cardiology";
+            case NEUROLOGY:
+            return "neurology";
+            case ORTHOPEDICS:
+            return "orthopedics";
+            case PEDIATRICS:
+            return "pediatrics";
+            case EMERGENCY:
+            return "emergency";
+            case GENERAL:
+            return "general";
+        }
+        return "general"; //fallback
+    }
     // ========== NEW FEATURES ========== //
 
-    // Display waiting patients
-    void displayAppointments();
-
+     // Display waiting patients
+    void displayAppointments(){
+        queue<int> temp = appointmentQueue;
+        if(appointmentQueue.empty())
+        {
+            cout << "No appointments." << endl;
+            return ;
+        }
+        cout << "Apppointments Queue: "<< endl;
+        while(!temp.empty())
+        {
+            int id = temp.front();
+            cout << "-Patient ID: " <<  id << endl;
+            temp.pop();
+        }
+    }
     // Cancel appointment
-    void cancelAppointment(int patientId);
+    void cancelAppointment(int patientId)
+    {
+        queue<int> temp ;
+        bool found = false; // to ensure first occurance only
+        if (appointmentQueue.empty())
+         {
+        cout << "No appointments available." << endl;
+        return;
+        }
+        while(!appointmentQueue.empty())
+        {
+            if(appointmentQueue.front() == patientId && !found)
+            {
+                found = true;
+            }         
+            else
+            {
+            temp.push(appointmentQueue.front());
+            }
+         appointmentQueue.pop();   
+        }
+        appointmentQueue = temp ;
+        if(found)
+          cout << "Appointment cancelled successfully." << endl;
+        else 
+        cout << "Appointment not found." << endl; 
+    }
 
     // Number of waiting patients
-    int getAppointmentCount();
+    int getAppointmentCount()
+    {
+        return appointmentQueue.size();
+    }
 };
 
 
@@ -344,7 +423,7 @@ public:
         int patientId,
         RoomType type
     ){
-        // Search by ID (never by vector index — SRS Section 11 best practice)
+        // Search by ID (never by vector index ï¿½ SRS Section 11 best practice)
         for (Patient &p : patients) {
             if (p.getId() == patientId) {
                 // Check room capacity before admitting
@@ -454,7 +533,7 @@ public:
         }
         return false;
     }
-};
+
 
 
     // =====================================================
@@ -663,15 +742,36 @@ void displayRoomStatus() {
     // Display All Patients
     // ===================================================== //
 
-    void displayAllPatients();
-
-
+    void displayAllPatients()
+    {
+        if (patients.empty())
+    {
+        cout << "No patients registered." << endl;
+        return;
+    }
+    for (Patient &p : patients)
+    {
+        displayPatientInfo(p.getId());
+    }
+    }
     // =====================================================
     // NEW FEATURE 16
     // Display All Doctors
     // ===================================================== //
 
-    void displayAllDoctors();
+    void displayAllDoctors()
+    {
+        if (doctors.empty())
+    {
+        cout << "No doctors registered." << endl;
+        return;
+    }
+
+    for (Doctor &d : doctors)
+    {
+       displayDoctorInfo(d.getId());
+    }
+    }
 
 
     // =====================================================
@@ -712,7 +812,7 @@ void displayRoomStatus() {
 
     void displayStatistics();
 
-
+};
 
 // ========== MAIN PROGRAM ========== //
 int main() {
