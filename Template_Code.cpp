@@ -30,13 +30,19 @@ private:
     int severity;
 
 public:
-    EmergencyCase(int pid, int s);
-
-    int getPatientId() const;
-    int getSeverity() const;
+    EmergencyCase(int pid, int s) {
+        patientId = pid;
+        severity = s;
+        
+    int getPatientId() const {
+         return patientId;
+    int getSeverity() const {
+         return severity;
 
     // Higher severity = higher priority
-    bool operator<(const EmergencyCase& other) const;
+    bool operator<(const EmergencyCase& other) const {
+        return severity < other.severity;
+    }   
 };
 
 
@@ -344,7 +350,7 @@ public:
         int patientId,
         RoomType type
     ){
-        // Search by ID (never by vector index — SRS Section 11 best practice)
+        // Search by ID (never by vector index â€” SRS Section 11 best practice)
         for (Patient &p : patients) {
             if (p.getId() == patientId) {
                 // Check room capacity before admitting
@@ -758,21 +764,31 @@ void displayRoomStatus() {
     // Display Doctor Appointments
     // ===================================================== //
 
-    void displayDoctorAppointments(
-        int doctorId
-    );
-
+    void displayDoctorAppointments(int doctorId) {
+        for (Doctor &d : doctors) {
+            if (d.getId() == doctorId) {
+                cout << "Appointments for " << d.getName() << ":" << endl;
+                d.displayAppointments();
+                return;
+            }
+        }
+        cout << "Doctor with ID " << doctorId << " not found." << endl;
+    }
 
     // =====================================================
     // NEW FEATURE 18
     // Cancel Appointment
     // ===================================================== //
 
-    void cancelAppointment(
-        int doctorId,
-        int patientId
-    );
-
+    void cancelAppointment(int doctorId,int patientId) {
+        for (Doctor &d : doctors) {
+            if (d.getId() == doctorId) {
+                d.cancelAppointment(patientId);
+                return;
+            }
+        }
+        cout << "Doctor with ID " << doctorId << " not found." << endl;
+    }
 
     // =====================================================
     // NEW FEATURE 19
