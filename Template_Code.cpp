@@ -33,16 +33,20 @@ public:
     EmergencyCase(int pid, int s) {
         patientId = pid;
         severity = s;
-        
+    }
+
     int getPatientId() const {
-         return patientId;
+        return patientId;
+    }
+
     int getSeverity() const {
-         return severity;
+        return severity;
+    }
 
     // Higher severity = higher priority
     bool operator<(const EmergencyCase& other) const {
         return severity < other.severity;
-    }   
+    }
 };
 
 
@@ -239,6 +243,7 @@ int getId() {
  RoomType getRoomType() {
     return roomType;
 }
+};
 
 
 // ========== DOCTOR CLASS ========== //
@@ -253,28 +258,93 @@ private:
 
 public:
     // Constructor
-    Doctor(int did, string n, Department d);
+    Doctor(int did, string n, Department d) {
+        id = did;
+        name = n;
+        department = d;
+    }
 
     // ========== ORIGINAL FEATURES ========== //
 
-    void addAppointment(int patientId);
-    int seePatient();
+    void addAppointment(int patientId) {
+        appointmentQueue.push(patientId);
+    }
 
-    int getId();
-    string getName();
-    string getDepartment();
+    int seePatient() {
+        if (appointmentQueue.empty()) {
+            return -1;
+        }
+        int patientId = appointmentQueue.front();
+        appointmentQueue.pop();
+        return patientId;
+    }
+
+    int getId() {
+        return id;
+    }
+
+    string getName() {
+        return name;
+    }
+
+    string getDepartment() {
+        switch (department) {
+            case CARDIOLOGY:  return "Cardiology";
+            case NEUROLOGY:   return "Neurology";
+            case ORTHOPEDICS: return "Orthopedics";
+            case PEDIATRICS:  return "Pediatrics";
+            case EMERGENCY:   return "Emergency";
+            case GENERAL:     return "General";
+        }
+        return "Unknown";
+    }
 
 
     // ========== NEW FEATURES ========== //
 
     // Display waiting patients
-    void displayAppointments();
+    void displayAppointments() {
+        if (appointmentQueue.empty()) {
+            cout << "No patients waiting." << endl;
+            return;
+        }
+
+        queue<int> temp = appointmentQueue;
+        while (!temp.empty()) {
+            cout << "- Patient ID: " << temp.front() << endl;
+            temp.pop();
+        }
+    }
 
     // Cancel appointment
-    void cancelAppointment(int patientId);
+    void cancelAppointment(int patientId) {
+        queue<int> temp;
+        bool found = false;
+
+        while (!appointmentQueue.empty()) {
+            int currentId = appointmentQueue.front();
+            appointmentQueue.pop();
+
+            if (currentId == patientId && !found) {
+                found = true; // skip this one (removes it)
+            } else {
+                temp.push(currentId);
+            }
+        }
+
+        appointmentQueue = temp;
+
+        if (found) {
+            cout << "Appointment cancelled for patient " << patientId << endl;
+        } else {
+            cout << "Patient " << patientId << " has no appointment with this doctor." << endl;
+        }
+    }
 
     // Number of waiting patients
-    int getAppointmentCount();
+    int getAppointmentCount() {
+        return appointmentQueue.size();
+    }
 };
 
 
@@ -460,7 +530,6 @@ public:
         }
         return false;
     }
-};
 
 
     // =====================================================
@@ -485,7 +554,7 @@ public:
 
     Doctor* findDoctor(int doctorId) {
         for (Doctor &d:doctors) {
-            if (d.getId() == doctorId) { 
+            if (d.getId() == doctorId) {
                 return &d;
             }
         }
@@ -707,28 +776,8 @@ public:
 
 
 
-    // =====================================================
-    // NEW FEATURE 13
-    // Room Availability
-    // ===================================================== //
-
-   bool isRoomAvailable(RoomType type) {
-    switch (type) {
-        case GENERAL_WARD:
-            return generalRooms > 0;
-
-        case ICU:
-            return icuRooms > 0;
-
-        case PRIVATE_ROOM:
-            return privateRooms > 0;
-
-        case SEMI_PRIVATE:
-            return semiPrivateRooms > 0;
-    }
-
-    return false;
-}
+    // (NEW FEATURE 13 "Room Availability" removed — it was a duplicate
+    //  of isRoomAvailable() already defined in the ORIGINAL FEATURES section)
 
 
     // =====================================================
@@ -748,7 +797,20 @@ void displayRoomStatus() {
     // Display All Patients
     // ===================================================== //
 
-    void displayAllPatients();
+    void displayAllPatients() {
+        if (patients.empty()) {
+            cout << "No patients registered." << endl;
+            return;
+        }
+
+        cout << "=============== ALL PATIENTS =============\n";
+        for (Patient &p : patients) {
+            cout << "ID: " << p.getId()
+                 << " | Name: " << p.getName()
+                 << " | Status: " << (p.getAdmissionStatus() ? "Admitted" : "Not Admitted")
+                 << endl;
+        }
+    }
 
 
     // =====================================================
@@ -756,7 +818,20 @@ void displayRoomStatus() {
     // Display All Doctors
     // ===================================================== //
 
-    void displayAllDoctors();
+    void displayAllDoctors() {
+        if (doctors.empty()) {
+            cout << "No doctors registered." << endl;
+            return;
+        }
+
+        cout << "=============== ALL DOCTORS =============\n";
+        for (Doctor &d : doctors) {
+            cout << "ID: " << d.getId()
+                 << " | Name: " << d.getName()
+                 << " | Department: " << d.getDepartment()
+                 << endl;
+        }
+    }
 
 
     // =====================================================
